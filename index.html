@@ -21,6 +21,7 @@
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      position: relative;
     }
     label {
       font-weight: bold;
@@ -44,13 +45,17 @@
       max-height: 150px;
       overflow-y: auto;
       display: none;
+      position: absolute;
+      width: calc(100% - 40px);
+      z-index: 10;
     }
     ul.suggestions li {
       padding: 8px;
       cursor: pointer;
     }
-    ul.suggestions li:hover {
-      background: #f0f0f0;
+    ul.suggestions li:hover,
+    ul.suggestions li.active {
+      background: #e9f3ff;
     }
   </style>
 </head>
@@ -72,13 +77,12 @@
   </div>
 
   <div class="container">
-    <label for="dropdown-dynamic">Phần 2: Dropdown động (gợi ý khi nhập)</label>
-    <input type="text" id="dropdown-dynamic" placeholder="Nhập từ khóa để tìm...">
+    <label for="dropdown-dynamic">Phần 2: Dropdown động (gợi ý khi nhập / click)</label>
+    <input type="text" id="dropdown-dynamic" placeholder="Nhập hoặc click để chọn...">
     <ul id="suggestion-list" class="suggestions"></ul>
   </div>
 
   <script>
-    // Danh sách dữ liệu cho dropdown động
     const countries = [
       "Việt Nam", "Thái Lan", "Campuchia", "Lào",
       "Singapore", "Malaysia", "Philippines", "Indonesia",
@@ -88,36 +92,74 @@
 
     const input = document.getElementById('dropdown-dynamic');
     const suggestionList = document.getElementById('suggestion-list');
+    let currentFocus = -1;
 
-    input.addEventListener('input', () => {
-      const keyword = input.value.toLowerCase().trim();
+    // Hàm hiển thị danh sách gợi ý
+    function showSuggestions(list) {
       suggestionList.innerHTML = '';
-
-      if (keyword === '') {
+      if (list.length === 0) {
         suggestionList.style.display = 'none';
         return;
       }
+      list.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        li.addEventListener('click', () => {
+          input.value = item;
+          suggestionList.style.display = 'none';
+        });
+        suggestionList.appendChild(li);
+      });
+      suggestionList.style.display = 'block';
+    }
 
-      // Lọc ra các quốc gia chứa từ khóa
+    // Khi click vào ô input → hiển thị toàn bộ danh sách
+    input.addEventListener('focus', () => {
+      showSuggestions(countries);
+    });
+
+    // Khi nhập vào ô input → lọc theo từ khóa
+    input.addEventListener('input', () => {
+      const keyword = input.value.toLowerCase().trim();
       const filtered = countries.filter(country =>
         country.toLowerCase().includes(keyword)
       );
+      showSuggestions(filtered);
+    });
 
-      if (filtered.length > 0) {
-        filtered.forEach(item => {
-          const li = document.createElement('li');
-          li.textContent = item;
-          li.addEventListener('click', () => {
-            input.value = item;
-            suggestionList.style.display = 'none';
-          });
-          suggestionList.appendChild(li);
-        });
-        suggestionList.style.display = 'block';
-      } else {
-        suggestionList.style.display = 'none';
+    // Dùng phím mũi tên lên / xuống / Enter để chọn
+    input.addEventListener('keydown', (e) => {
+      const items = suggestionList.getElementsByTagName('li');
+      if (!items) return;
+
+      if (e.key === 'ArrowDown') {
+        currentFocus++;
+        addActive(items);
+      } else if (e.key === 'ArrowUp') {
+        currentFocus--;
+        addActive(items);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (currentFocus > -1 && items[currentFocus]) {
+          items[currentFocus].click();
+        }
       }
     });
+
+    function addActive(items) {
+      if (!items) return false;
+      removeActive(items);
+      if (currentFocus >= items.length) currentFocus = 0;
+      if (currentFocus < 0) currentFocus = items.length - 1;
+      items[currentFocus].classList.add('active');
+      items[currentFocus].scrollIntoView({ block: 'nearest' });
+    }
+
+    function removeActive(items) {
+      for (let item of items) {
+        item.classList.remove('active');
+      }
+    }
 
     // Ẩn danh sách khi click ra ngoài
     document.addEventListener('click', (e) => {
