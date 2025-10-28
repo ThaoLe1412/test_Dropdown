@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Drop-down Tĩnh & Động</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fa;
+      text-align: center;
+      padding: 50px;
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    select {
+      padding: 8px 12px;
+      margin: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    .container {
+      background: white;
+      display: inline-block;
+      padding: 30px 50px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      font-size: 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    p {
+      font-weight: bold;
+      color: #007bff;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🎯 Drop-down Tĩnh</h2>
+    <select id="staticDropdown">
+      <option value="">-- Chọn một loại trái cây --</option>
+      <option value="apple">Táo</option>
+      <option value="banana">Chuối</option>
+      <option value="mango">Xoài</option>
+    </select>
+
+    <h2>⚡ Drop-down Động</h2>
+    <select id="dynamicDropdown">
+      <option value="">-- Chọn một quốc gia --</option>
+    </select>
+
+    <br>
+    <button onclick="checkSelection()">Kiểm tra</button>
+
+    <p id="result"></p>
+  </div>
+
+  <script>
+    // Sinh dropdown động
+    const countries = ["Việt Nam", "Mỹ", "Nhật Bản", "Hàn Quốc", "Anh", "Pháp"];
+    const dynamicDropdown = document.getElementById("dynamicDropdown");
+
+    countries.forEach(country => {
+      const option = document.createElement("option");
+      option.value = country.toLowerCase();
+      option.textContent = country;
+      dynamicDropdown.appendChild(option);
+    });
+
+    // Xử lý kiểm tra
+    function checkSelection() {
+      const fruit = document.getElementById("staticDropdown").value;
+      const country = document.getElementById("dynamicDropdown").value;
+      const result = document.getElementById("result");
+
+      if (fruit && country) {
+        result.textContent = `✅ Bạn chọn: ${fruit.toUpperCase()} và ${country.toUpperCase()}`;
+      } else {
+        result.textContent = "⚠️ Vui lòng chọn đầy đủ cả 2 mục!";
+      }
+    }
+  </script>
+</body>
+</html>
