@@ -2,102 +2,130 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Drop-down Tĩnh & Động</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kiểm tra Dropdown</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f6fa;
-      text-align: center;
-      padding: 50px;
+      margin: 40px;
+      background: #f9f9f9;
     }
-
     h2 {
       color: #333;
+      text-align: center;
     }
-
-    select {
-      padding: 8px 12px;
-      margin: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-
     .container {
+      width: 400px;
+      margin: 30px auto;
       background: white;
-      display: inline-block;
-      padding: 30px 50px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      font-size: 15px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    p {
+    label {
       font-weight: bold;
-      color: #007bff;
-      margin-top: 15px;
+      display: block;
+      margin-bottom: 8px;
+    }
+    select, input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    ul.suggestions {
+      list-style: none;
+      padding: 0;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: #fff;
+      max-height: 150px;
+      overflow-y: auto;
+      display: none;
+    }
+    ul.suggestions li {
+      padding: 8px;
+      cursor: pointer;
+    }
+    ul.suggestions li:hover {
+      background: #f0f0f0;
     }
   </style>
 </head>
 <body>
+
+  <h2>Kiểm tra Dropdown</h2>
+
   <div class="container">
-    <h2>🎯 Drop-down Tĩnh</h2>
-    <select id="staticDropdown">
-      <option value="">-- Chọn một loại trái cây --</option>
-      <option value="apple">Táo</option>
-      <option value="banana">Chuối</option>
-      <option value="mango">Xoài</option>
-    </select>
-
-    <h2>⚡ Drop-down Động</h2>
-    <select id="dynamicDropdown">
+    <label for="dropdown-static">Phần 1: Dropdown tĩnh</label>
+    <select id="dropdown-static">
       <option value="">-- Chọn một quốc gia --</option>
+      <option>Việt Nam</option>
+      <option>Thái Lan</option>
+      <option>Campuchia</option>
+      <option>Lào</option>
+      <option>Singapore</option>
+      <option>Malaysia</option>
     </select>
+  </div>
 
-    <br>
-    <button onclick="checkSelection()">Kiểm tra</button>
-
-    <p id="result"></p>
+  <div class="container">
+    <label for="dropdown-dynamic">Phần 2: Dropdown động (gợi ý khi nhập)</label>
+    <input type="text" id="dropdown-dynamic" placeholder="Nhập từ khóa để tìm...">
+    <ul id="suggestion-list" class="suggestions"></ul>
   </div>
 
   <script>
-    // Sinh dropdown động
-    const countries = ["Việt Nam", "Mỹ", "Nhật Bản", "Hàn Quốc", "Anh", "Pháp"];
-    const dynamicDropdown = document.getElementById("dynamicDropdown");
+    // Danh sách dữ liệu cho dropdown động
+    const countries = [
+      "Việt Nam", "Thái Lan", "Campuchia", "Lào",
+      "Singapore", "Malaysia", "Philippines", "Indonesia",
+      "Myanmar", "Brunei", "Đông Timor", "Trung Quốc",
+      "Nhật Bản", "Hàn Quốc", "Ấn Độ"
+    ];
 
-    countries.forEach(country => {
-      const option = document.createElement("option");
-      option.value = country.toLowerCase();
-      option.textContent = country;
-      dynamicDropdown.appendChild(option);
+    const input = document.getElementById('dropdown-dynamic');
+    const suggestionList = document.getElementById('suggestion-list');
+
+    input.addEventListener('input', () => {
+      const keyword = input.value.toLowerCase().trim();
+      suggestionList.innerHTML = '';
+
+      if (keyword === '') {
+        suggestionList.style.display = 'none';
+        return;
+      }
+
+      // Lọc ra các quốc gia chứa từ khóa
+      const filtered = countries.filter(country =>
+        country.toLowerCase().includes(keyword)
+      );
+
+      if (filtered.length > 0) {
+        filtered.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = item;
+          li.addEventListener('click', () => {
+            input.value = item;
+            suggestionList.style.display = 'none';
+          });
+          suggestionList.appendChild(li);
+        });
+        suggestionList.style.display = 'block';
+      } else {
+        suggestionList.style.display = 'none';
+      }
     });
 
-    // Xử lý kiểm tra
-    function checkSelection() {
-      const fruit = document.getElementById("staticDropdown").value;
-      const country = document.getElementById("dynamicDropdown").value;
-      const result = document.getElementById("result");
-
-      if (fruit && country) {
-        result.textContent = `✅ Bạn chọn: ${fruit.toUpperCase()} và ${country.toUpperCase()}`;
-      } else {
-        result.textContent = "⚠️ Vui lòng chọn đầy đủ cả 2 mục!";
+    // Ẩn danh sách khi click ra ngoài
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.container')) {
+        suggestionList.style.display = 'none';
       }
-    }
+    });
   </script>
+
 </body>
 </html>
